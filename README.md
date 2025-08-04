@@ -46,13 +46,20 @@ curl --location 'http://localhost:8080/v1/api/redis/addPayload' \
   }
 }
 ```
-### 1. Get Payload
+### 2. Get Payload
 - **GET** `/v1/api/redis/getPayload/{userId}`
 - **PathVariable**: userId
 ```bash
 curl --location 'http://localhost:8080/v1/api/redis/getPayload/user_id_2'
 ```
 
+### 3. Test Concurrent Read
+- **GET** `/v1/api/redis/test-concurrent-read/{userId}/{threadCount}`
+- **PathVariable**: userId, threadCount
+
+```bash
+curl --location 'http://localhost:8080/v1/api/redis/test-concurrent-read/user_id_2/10'
+```
 ## How It Works
 ### 1. Add Payload:
 

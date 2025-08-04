@@ -7,6 +7,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +41,10 @@ public class PayloadService {
      * @return a Map containing the payload data, or an empty map if no data exists
      */
     public Map<String, String> consumeAndDelete(String userId) {
+        String now = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+        System.out.println("Lecture à " + now + " pour userId=" + userId);
+
         String key = "user:pending:" + userId;
 
         String luaScript = """
@@ -59,7 +64,9 @@ public class PayloadService {
                         )
         );
 
-        Map<String, String> resultMap = getStringStringMap(rawResult);
+        Map<String, String> resultMap = new LinkedHashMap<>();
+        resultMap.put("executionTime", now);
+        resultMap.putAll(getStringStringMap(rawResult));
 
         return resultMap;
     }

@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 @RestController
 @RequestMapping("/v1/api/redis")
@@ -38,6 +39,26 @@ public class RedisController {
     public ResponseEntity< Map<String, String>> getPayload(@PathVariable String userId) {
         Map<String, String> payload = payloadService.consumeAndDelete(userId);
         return ResponseEntity.ok(payload);
+    }
+
+    @GetMapping("/test-concurrent-read/{userId}/{threadCount}")
+    public ResponseEntity<String> testConcurrentRead(
+            @PathVariable String userId,
+            @PathVariable int threadCount) throws InterruptedException {
+
+        ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(threadCount);
+
+        for (int i = 0; i < threadCount; i++) {
+            executor.submit(() -> {
+                Map<String, String> result = payloadService.consumeAndDelete(userId);
+                System.out.println("Thread " + Thread.currentThread().getName() + " result: " + result);
+            });
+        }
+
+        executor.shutdown();
+        executor.awaitTermination(10, java.util.concurrent.TimeUnit.SECONDS);
+
+        return ResponseEntity.ok("Concurrent read test finished. Check logs for results.");
     }
 
 
